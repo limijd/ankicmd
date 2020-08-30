@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# pylint: disable=C0103,W0703,R0902,R1711,C0116
+# pylint: disable=C0103,W0703,R0902,R1711,C0116,C0115
 
 '''
 akbuild.py provides B* classes to represent the tables in ANKI database.
@@ -11,7 +11,6 @@ import logging
 from anki.collection import Collection
 
 class BCollection:
-    ''' represent ANKI collection '''
     def __init__(self, col: Collection):
         self.col = col
         self.bdecks = {}
@@ -114,7 +113,6 @@ class BCollection:
         return
 
 class BDeck:
-    ''' represent ANKI deck '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
@@ -153,7 +151,6 @@ class BDeck:
 
 
 class BCard:
-    ''' represent ANKI card '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
@@ -167,7 +164,6 @@ class BCard:
         return self.rdata
 
 class BNote:
-    ''' represent ANKI note '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
@@ -181,7 +177,6 @@ class BNote:
         return self.rdata
 
 class BNoteType:
-    ''' represent ANKI note type '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
@@ -215,7 +210,6 @@ class BNoteType:
 
 
 class BCardType:
-    ''' represent ANKI card type '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
@@ -243,7 +237,6 @@ class BCardType:
         return '[%s, %d, %d, %s]' % (self.key, self.ntid, self.ord, self.name)
 
 class BTag:
-    ''' represent ANKI tag '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
@@ -258,7 +251,6 @@ class BTag:
         return self.name
 
 class BField:
-    ''' represent ANKI field '''
     def __init__(self, raw_data):
         self.rdata = raw_data
         self.bnt = None
