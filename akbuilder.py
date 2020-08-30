@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# pylint: disable=C0103,W0703,R0902,R1711,C0116
+
+'''
+akbuild.py provides B* classes to represent the tables in ANKI database.
+And class objects will be linked as needed.
+'''
 
 import logging
 from anki.collection import Collection
 
-
 class BCollection:
+    ''' represent ANKI collection '''
     def __init__(self, col: Collection):
         self.col = col
         self.bdecks = {}
@@ -30,7 +36,7 @@ class BCollection:
 
     def link_all(self):
         # link BDecks and BNoteTypes
-        for did,bd in self.bdecks.items():
+        for bd in self.bdecks.values():
             # all note types
             ntids = bd.queryAllNoteTypes()
             for ntid in ntids:
@@ -39,7 +45,7 @@ class BCollection:
                 bnt.addBDeck(bd)
 
         # link BDeck, BCardType and BNoteType
-        for key, bct in self.bcardTypes.items():
+        for bct in self.bcardTypes.values():
             bnt = self.bnoteTypes[bct.ntid]
             bnt.addBCardType(bct)
             bct.setBNoteType(bnt)
@@ -50,7 +56,7 @@ class BCollection:
         # fill BField to BNoteType
         for bf in self.bfields.values():
             bnt = self.bnoteTypes[bf.ntid]
-            assert(bnt)
+            assert bnt
             bnt.addBField(bf)
             bf.setBNoteType(bnt)
 
@@ -108,11 +114,14 @@ class BCollection:
         return
 
 class BDeck:
+    ''' represent ANKI deck '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
         self.noteTypes = {}
         self.cardTypes = {}
+        self.name = None
+        self.id = None
         return
 
     def build(self):
@@ -121,7 +130,8 @@ class BDeck:
         return
 
     def queryAllNoteTypes(self):
-        sql = 'select DISTINCT mid from notes where id IN ( select nid from cards where did=%d)' % self.id
+        sql_nids = 'select nid from cards where did=%d' % self.id
+        sql = 'select DISTINCT mid from notes where id IN ( %s )' % sql_nids
         return map(lambda x:x[0], self.bcol.col.db.all(sql))
 
     def addBNoteType(self, bnt):
@@ -143,30 +153,43 @@ class BDeck:
 
 
 class BCard:
+    ''' represent ANKI card '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
         return
 
     def build(self):
+        print("TBD", self.rdata)
         return
+
+    def __repr__(self):
+        return self.rdata
 
 class BNote:
+    ''' represent ANKI note '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
         return
 
     def build(self):
+        print("TBD", self.rdata)
         return
 
+    def __repr__(self):
+        return self.rdata
+
 class BNoteType:
+    ''' represent ANKI note type '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
         self.bdecks = {} #used by these decks
         self.bcardTypes={}
         self.bfields={}
+        self.id = None
+        self.name = None
         return
 
     def build(self):
@@ -192,19 +215,21 @@ class BNoteType:
 
 
 class BCardType:
+    ''' represent ANKI card type '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
         self.bdecks = {} #decks that are using this card type
         self.bnt = None
+        self.ntid = None
+        self.ord = None
+        self.name = None
+        self.key = None
         return
 
     def build(self):
-        [ntid, ord, name] = self.rdata[0:3]
-        self.ntid = ntid #noteType ID
-        self.ord = ord
-        self.name = name
-        self.key = "%d:%d"%(ntid, ord)
+        self.ntid, self.ord, self.name = self.rdata[0:3]
+        self.key = "%d:%d"%(self.ntid, self.ord)
         return
 
     def addBDeck(self, bd):
@@ -218,9 +243,11 @@ class BCardType:
         return '[%s, %d, %d, %s]' % (self.key, self.ntid, self.ord, self.name)
 
 class BTag:
+    ''' represent ANKI tag '''
     def __init__(self, bcol: BCollection, raw_data):
         self.bcol = bcol
         self.rdata = raw_data
+        self.name = None
         return
 
     def build(self):
@@ -231,9 +258,14 @@ class BTag:
         return self.name
 
 class BField:
+    ''' represent ANKI field '''
     def __init__(self, raw_data):
         self.rdata = raw_data
         self.bnt = None
+        self.ntid = None
+        self.ord = None
+        self.name = None
+        self.key = None
         return
 
     def build(self):
