@@ -1,2 +1,2 @@
 # ankicmd
-make a ANKI 3rd party library and command line tool
+make an ANKI 3rd party library and command line tool
