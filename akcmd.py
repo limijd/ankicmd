@@ -43,6 +43,22 @@ def do_list_note_types(bcol):
     text_table.add_rows(table)
     print(text_table.draw())
 
+def do_export_deck_note(bcol, deck_name, key_only):
+    '''--export_deck_note'''
+    export_bdeck = None
+    for dummy, bdeck in sorted(bcol.bdecks.items()):
+        if deck_name == bdeck.name:
+            export_bdeck = bdeck
+
+    if not export_bdeck:
+        logging.error("Deck: %s not found.", deck_name)
+
+    notes = export_bdeck.queryNotes()
+    keys = map(lambda x:x[0], notes)
+    for k in keys:
+        print(k)
+    return
+
 def do_cui(args):
     ''' CUI entry '''
     print(args.anki_db)
@@ -67,6 +83,10 @@ def do_cui(args):
     if args.list_note_types:
         do_list_note_types(bcol)
 
+    if args.export_deck_note:
+        deck_name = args.export_deck_note
+        do_export_deck_note(bcol, deck_name, args.export_deck_note_only_key)
+
 def main():
     ''' main entry '''
     parser: ArgumentParser = argparse.ArgumentParser(prog=os.path.basename(__file__)
@@ -76,6 +96,9 @@ def main():
     parser.add_argument('-d', '--debug', action='store_true', help="debug mode")
     parser.add_argument('-ld', '--list_deck', action='store_true', help="list decks")
     parser.add_argument('-lnt', '--list_note_types', action='store_true', help="list note types")
+    parser.add_argument('-edn', '--export_deck_note', help="-edn <deckName> export the specified deck note")
+    parser.add_argument('-ednok', '--export_deck_note_only_key', action='store_true', help="only export key column")
+    parser.add_argument('-edc', '--export_deck_card', help="-edc=<deckName> export the specified deck card")
     parser.set_defaults(func=do_cui)
 
     args = parser.parse_args()
