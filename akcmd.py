@@ -59,6 +59,12 @@ def do_export_deck_note(bcol, deck_name, key_only):
         print(k)
     return
 
+def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t"):
+    col = bcol.col
+    deck_id = col.decks.id(deck_name)
+    print(deck_name, deck_id)
+    return
+
 def do_cui(args):
     ''' CUI entry '''
     print(args.anki_db)
@@ -87,6 +93,12 @@ def do_cui(args):
         deck_name = args.export_deck_note
         do_export_deck_note(bcol, deck_name, args.export_deck_note_only_key)
 
+    if args.import_to_deck:
+        deck_name = args.import_to_deck
+        data_file = args.import_data_file
+        note_type = args.import_note_type
+        do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t")
+
 def main():
     ''' main entry '''
     parser: ArgumentParser = argparse.ArgumentParser(prog=os.path.basename(__file__)
@@ -99,6 +111,10 @@ def main():
     parser.add_argument('-edn', '--export_deck_note', help="-edn <deckName> export the specified deck note")
     parser.add_argument('-ednok', '--export_deck_note_only_key', action='store_true', help="only export key column")
     parser.add_argument('-edc', '--export_deck_card', help="-edc=<deckName> export the specified deck card")
+    parser.add_argument("-itd", "--import_to_deck", help="deck that the notes will be imported to ")
+    parser.add_argument("-idf", "--import_data_file", help="text data file that contains records")
+    parser.add_argument("-int", "--import_note_type", help="notetype to be used when do import")
+
     parser.set_defaults(func=do_cui)
 
     args = parser.parse_args()
