@@ -148,7 +148,7 @@ class BDeck:
 
     def queryNotes(self):
         sql_nids = 'select nid from cards where did=%d' % self.id
-        sql = 'select sfld, flds from notes where id IN ( %s )'%sql_nids
+        sql = 'select id, sfld, flds, tags from notes where id IN ( %s )'%sql_nids
         return self.bcol.col.db.all(sql)
 
     def __repr__(self):

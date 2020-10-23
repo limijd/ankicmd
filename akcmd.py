@@ -14,6 +14,7 @@ from argparse import ArgumentParser
 from texttable import Texttable
 from anki.collection import Collection
 from akbuilder import BCollection
+from anki.importing import TextImporter
 
 def do_list_deck(bcol:BCollection):
     '''--list_deck '''
@@ -61,12 +62,90 @@ def do_export_deck_note(bcol, deck_name, key_only):
 
 def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t"):
     col = bcol.col
+
+    existingNotes = {}
+
+    #load existing notes
+    bdeck = None
+    for dummy, bdk in sorted(bcol.bdecks.items()):
+        if deck_name == bdk.name:
+            bdeck = bdk
+    assert bdeck
+    notes = bdeck.queryNotes()
+    for n in notes:
+        note_id, note_subject, note_content, note_tags = n
+        note_content=note_content.split("\x1f")[1]
+        note_tags = note_tags.strip()
+        existingNotes[note_subject] = [note_id, note_subject, note_content, note_tags]
+
+    nochangeNotes = {}
+    toBeImportNotes = {}
+    toBeUpdatedNotes = {}
+    #load data fiel
+    fp = open(data_file, "r")
+    for line in fp.readlines():
+        line = line.strip()
+        parts = line.split("\t")
+        subject = parts[0]
+        content = parts[1]
+        if len(content)>int(131072*0.8): #131072 is limit of ANKI field
+            logging.error("Content too long to import: %d, note: %s", len(content), subject)
+            sys.exit(1)
+        if len(parts)==3:
+            tags = parts[2]
+            tags = tags.strip()
+        else:
+            tags = ""
+        if subject in existingNotes:
+            #compare content and tags
+            exist_note = existingNotes[subject]
+            if content == exist_note[2] and tags == exist_note[3]:
+                #doesn't need to be updated
+                nochangeNotes[subject] = True
+                pass
+            else:
+                logging.info("Updated note: %s", subject)
+                toBeUpdatedNotes[subject] = [subject ,content, tags, exist_note[0]]
+        else:
+            logging.info("New note: %s", subject)
+            toBeImportNotes[subject] = [subject, content, tags]
+    fp.close()
+
+    logging.info("%d notes wll be kept without any change", len(nochangeNotes))
+    logging.info("%d notes need to be updated.", len(toBeUpdatedNotes))
+    logging.info("%d notes need to be added.", len(toBeImportNotes))
+
+    if not toBeUpdatedNotes and not toBeImportNotes:
+        col.close()
+        logging.info("No new note need to be imported! Bye!")
+        sys.exit(1)
+
+    #set current model
     deck_id = col.decks.id(deck_name)
-    print(deck_name, deck_id)
+    model = col.models.byName(note_type)
+    if deck_id != model["did"]:
+        model['did'] = deck_id
+        col.models.save(model)
+
+    col.models.setCurrent(model)
+
+    logging.info("directly import: %s", data_file)
+    ti = TextImporter(col, data_file)
+    ti.allowHTML = True
+    ti.needDelimiter = True
+    ti.delimiter = "\t"
+    ti.importMode = 0 #UPDATE_MODE
+    ti.initMapping()
+    ti.run()
+
+    col.save()
+    col.close()
+
     return
 
 def do_cui(args):
     ''' CUI entry '''
+    args.import_data_file = os.path.abspath(args.import_data_file)
     print(args.anki_db)
     if not os.path.exists(args.anki_db):
         logging.error("ANKI database doesn't exist: %s", args.anki_db)
