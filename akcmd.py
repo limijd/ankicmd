@@ -146,7 +146,7 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t"):
 def do_cui(args):
     ''' CUI entry '''
     args.import_data_file = os.path.abspath(args.import_data_file)
-    print(args.anki_db)
+    logging.info("Connect to ANKI database: %s", args.anki_db)
     if not os.path.exists(args.anki_db):
         logging.error("ANKI database doesn't exist: %s", args.anki_db)
         sys.exit(-1)
