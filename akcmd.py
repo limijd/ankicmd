@@ -141,6 +141,8 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t"):
     col.save()
     col.close()
 
+    logging.info("Total %d imported,%d updated successfully.")
+
     return
 
 def do_cui(args):
