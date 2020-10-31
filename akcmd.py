@@ -60,7 +60,7 @@ def do_export_deck_note(bcol, deck_name, key_only):
         print(k)
     return
 
-def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t"):
+def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", import_mode=0):
     col = bcol.col
 
     existingNotes = {}
@@ -134,7 +134,7 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t"):
     ti.allowHTML = True
     ti.needDelimiter = True
     ti.delimiter = "\t"
-    ti.importMode = 0 #UPDATE_MODE
+    ti.importMode = import_mode #0, UPDATE_MODE; 1, IGNORE_MODE; 2, ADD_MODE
     ti.initMapping()
     ti.run()
 
@@ -178,7 +178,7 @@ def do_cui(args):
         deck_name = args.import_to_deck
         data_file = args.import_data_file
         note_type = args.import_note_type
-        do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t")
+        do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", import_mode=args.import_mode)
 
 def main():
     ''' main entry '''
@@ -195,6 +195,7 @@ def main():
     parser.add_argument("-itd", "--import_to_deck", help="deck that the notes will be imported to ")
     parser.add_argument("-idf", "--import_data_file", help="text data file that contains records")
     parser.add_argument("-int", "--import_note_type", help="notetype to be used when do import")
+    parser.add_argument("-im", "--import_mode", default=0, help="ANKI import mode: 0-update, 1-ignore, 2, add")
 
     parser.set_defaults(func=do_cui)
 
