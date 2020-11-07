@@ -144,11 +144,14 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", impor
     assert new_data_file
 
     #set current model
+    logging.info("setting current deck name: %s", deck_name)
     deck_id = col.decks.id(deck_name)
+    logging.info("setting current deck id: %s", deck_id)
+    logging.info("setting note_type : %s", note_type)
     model = col.models.byName(note_type)
-    if deck_id != model["did"]:
-        model['did'] = deck_id
-        col.models.save(model)
+    #if deck_id != model["did"]:
+    model['did'] = deck_id
+    col.models.save(model)
 
     col.models.setCurrent(model)
 
