@@ -73,7 +73,7 @@ def filter_import_data_file(data_file, toBeImported, toBeUpdated):
 
     fp.close()
 
-    fp = open(new_data_file, "r")
+    fp = open(new_data_file, "w")
     for line in new_lines:
         fp.write(line)
     fp.close()
