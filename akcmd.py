@@ -60,6 +60,26 @@ def do_export_deck_note(bcol, deck_name, key_only):
         print(k)
     return
 
+def filter_import_data_file(data_file, toBeImported, toBeUpdated):
+    if not toBeImported and not toBeUpdated:
+        return None
+    new_data_file = data_file +".filtered"
+    new_lines = []
+    fp = open(data_file, "r")
+    for line in fp.readlines():
+        key = line.split("\t")[0]
+        if key in toBeImported or key in toBeUpdated::
+            new_lines.append(line)
+
+    fp.close()
+
+    fp = open(new_data_file, "r")
+    for line in new_lines:
+        fp.write(line)
+    fp.close()
+
+    return new_data_file
+
 def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", import_mode=0):
     col = bcol.col
 
@@ -120,6 +140,9 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", impor
         logging.info("No new note need to be imported! Bye!")
         sys.exit(1)
 
+    new_data_file = filter_import_data_file(data_file, toBeImportedNotes, toBeUpdatedNotes)
+    assert new_data_file
+
     #set current model
     deck_id = col.decks.id(deck_name)
     model = col.models.byName(note_type)
@@ -129,8 +152,8 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", impor
 
     col.models.setCurrent(model)
 
-    logging.info("directly import: %s", data_file)
-    ti = TextImporter(col, data_file)
+    logging.info("directly import: %s", new_data_file)
+    ti = TextImporter(col, new_data_file)
     ti.allowHTML = True
     ti.needDelimiter = True
     ti.delimiter = "\t"
