@@ -140,7 +140,7 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", impor
         logging.info("No new note need to be imported! Bye!")
         sys.exit(1)
 
-    new_data_file = filter_import_data_file(data_file, toBeImportedNotes, toBeUpdatedNotes)
+    new_data_file = filter_import_data_file(data_file, toBeImportNotes, toBeUpdatedNotes)
     assert new_data_file
 
     #set current model
