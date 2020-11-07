@@ -149,10 +149,18 @@ def do_import_notes(bcol, deck_name, data_file, note_type, delimiter="\t", impor
     logging.info("setting current deck id: %s", deck_id)
     logging.info("setting note_type : %s", note_type)
     model = col.models.byName(note_type)
-    #if deck_id != model["did"]:
+
+    #select deck
+    col.decks.select(deck_id)
+
+    #update deck
+    deck = col.decks.get(deck_id)
+    deck['mid'] = model['id']
+    col.decks.save(deck)
+
+    #update model
     model['did'] = deck_id
     col.models.save(model)
-
     col.models.setCurrent(model)
 
     logging.info("directly import: %s", new_data_file)
