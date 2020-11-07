@@ -68,7 +68,7 @@ def filter_import_data_file(data_file, toBeImported, toBeUpdated):
     fp = open(data_file, "r")
     for line in fp.readlines():
         key = line.split("\t")[0]
-        if key in toBeImported or key in toBeUpdated::
+        if key in toBeImported or key in toBeUpdated:
             new_lines.append(line)
 
     fp.close()
